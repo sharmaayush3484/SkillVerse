@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>HTML Island - DevQuest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+</head>
+
+<style>
+    .progress-container {
+        width: 100%;
+        height: 10px;
+        background-color: #ddd;
+        margin-bottom: 20px;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: #4caf50;
+        width: 0%;
+        transition: width 0.5s ease;
+    }
+</style>
+
+<body class="bg-orange-100 text-gray-900 font-sans p-10">
+
+    <audio id="bgMusic" loop autoplay>
+        <source src="music/background.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+    </audio>
+
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-xl p-8">
+        <h1 class="text-3xl font-bold text-orange-600 mb-4">🗺️ Welcome to HTML Island</h1>
+        <p class="mb-4">Here, you’ll learn how to build the structure of the web!</p>
+
+        <h2 class="text-xl font-semibold mb-2">🔥 Challenges:</h2>
+        <ul class="list-disc pl-6 mb-6">
+            <li>Create a simple HTML page with headings & paragraphs</li>
+            <li>Build a basic form with input fields</li>
+            <li>Use links and images in your page</li>
+        </ul>
+
+        <button onclick="showPopup()"
+            class="mt-4 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg shadow-lg">
+            ✅ Mark as Complete
+        </button>
+
+        <a href="index.html"
+            class="inline-block mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg">⬅️ Back to
+            Map</a>
+    </div>
+    <!-- 🎉 Pop-up Modal -->
+    <div id="popup" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-xl text-center max-w-md mx-auto">
+            <h2 class="text-2xl font-bold text-green-600 mb-4">🎉 Level Complete!</h2>
+            <p class="mb-4">You've mastered <strong>HTML Island</strong>! 🏝️</p>
+            <button onclick="nextLevel()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md">➡️
+                Continue to CSS Cove</button>
+        </div>
+    </div>
+
+    <!-- 🔊 Sound Effect -->
+    <audio id="completionSound" src="https://www.myinstants.com/media/sounds/level-up.mp3"></audio>
+
+    <script>
+        const music = document.getElementById("bgMusic");
+
+        function toggleMusic() {
+            if (music.paused) {
+                music.play();
+            } else {
+                music.pause();
+            }
+        }
+
+        function showPopup() {
+            document.getElementById("popup").classList.remove("hidden");
+            localStorage.setItem("htmlCompleted", "true");
+            document.getElementById("completionSound").play();
+
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            // Redirect back to map after short delay
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 2500);
+        }
+
+        function nextLevel() {
+            localStorage.setItem("htmlCompleted", "true");
+            window.location.href = "css-cove.html";
+        }
+
+        function updateProgress() {
+            let progress = 0;
+            if (localStorage.getItem("htmlCompleted") === "true") progress += 33;
+            if (localStorage.getItem("cssCompleted") === "true") progress += 33;
+            if (localStorage.getItem("jsCompleted") === "true") progress += 34;
+            document.getElementById("progressBar").style.width = progress + "%";
+        }
+
+        window.onload = updateProgress;
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        window.onload = function () {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        };
+
+
+    </script>
+
+
+
+</body>
+
+</html>

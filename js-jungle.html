@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>JS Jungle - DevQuest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+</head>
+
+<body class="bg-green-100 text-gray-900 font-sans p-10">
+
+    <div id="mentor-chat" class="mentor-box">
+        <p id="mentor-msg">💡 Hello! Ready to explore?</p>
+    </div>
+
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-xl p-8">
+        <h1 class="text-3xl font-bold text-green-700 mb-4">🧠 Welcome to JS Jungle</h1>
+        <p class="mb-4">Let’s bring life to your websites with JavaScript!</p>
+
+        <h2 class="text-xl font-semibold mb-2">🧪 Challenges:</h2>
+        <ul class="list-disc pl-6 mb-6">
+            <li>Create an alert box on button click</li>
+            <li>Build a simple calculator using JS</li>
+            <li>Manipulate HTML using `getElementById`</li>
+        </ul>
+
+        <button onclick="showPopup()"
+            class="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow-lg">
+            ✅ Mark as Complete
+        </button>
+
+        <a href="index.html"
+            class="inline-block mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">⬅️ Back to Map</a>
+    </div>
+
+
+    <div id="popup" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-xl text-center max-w-md mx-auto">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">🎉 Level Complete!</h2>
+            <p class="mb-4">You’ve completed <strong>JS Jungle</strong>! 🐒🧠</p>
+            <button onclick="nextLevel()" class="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md">🎊
+                Back to Map</button>
+        </div>
+    </div>
+
+    <audio id="completionSound" src="https://www.myinstants.com/media/sounds/level-up.mp3"></audio>
+
+    <script>
+
+        if (localStorage.getItem("cssCompleted") !== "true") {
+            alert("🔒 Complete CSS Cove first!");
+            window.location.href = "css-cove.html";
+        }
+
+        function showPopup() {
+            document.getElementById("popup").classList.remove("hidden");
+            localStorage.setItem("jsCompleted", "true"); // ✅ correct key
+            document.getElementById("completionSound").play();
+
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+
+        function nextLevel() {
+            window.location.href = "index.html";
+        }
+
+        function showPopup() {
+            document.getElementById("popup").classList.remove("hidden");
+            localStorage.setItem("htmlCompleted", "true");
+            document.getElementById("completionSound").play();
+
+            // 🎉 Confetti
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+
+
+
+        const mentorHints = [
+            "Try using semantic tags like <section> or <article>.",
+            "Don't forget to close your tags!",
+            "Use classes to apply styles easily.",
+            "Remember: External CSS keeps your code cleaner.",
+            "Try adding a hover effect to your button!"
+        ];
+
+        function typeText(text, elementId, delay = 50) {
+            const element = document.getElementById(elementId);
+            element.textContent = "";
+            let index = 0;
+
+            const typing = setInterval(() => {
+                if (index < text.length) {
+                    element.textContent += text.charAt(index);
+                    index++;
+                } else {
+                    clearInterval(typing);
+                }
+            }, delay);
+        }
+
+        setInterval(() => {
+            const random = Math.floor(Math.random() * mentorHints.length);
+            typeText("💬 " + mentorHints[random], "mentor-msg");
+        }, 8000);
+
+
+
+
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DevQuest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a2e0d5d5c2.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #0a0a0a, #1a1a1a);
+            overflow: hidden;
+            position: relative;
+        }
+        .starry-bg {
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><filter id="glow"><feGaussianBlur stdDeviation="2.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#glow)"><circle cx="10%" cy="10%" r="2" fill="white" opacity="0.5"/><circle cx="80%" cy="20%" r="1" fill="white" opacity="0.3"/><circle cx="50%" cy="70%" r="1.5" fill="white" opacity="0.4"/><circle cx="30%" cy="40%" r="1" fill="white" opacity="0.3"/><circle cx="90%" cy="80%" r="2" fill="white" opacity="0.5"/></g></svg>') no-repeat center/cover;
+            animation: twinkle 10s infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+        }
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        }
+        .error-shake {
+            animation: shake 0.3s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #a855f7;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .glow-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .glow-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.5s ease;
+        }
+        .glow-btn:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center text-white">
+    <div class="starry-bg"></div>
+    <div class="glass-card p-8 rounded-xl shadow-lg max-w-sm w-full z-10">
+        <h1 class="text-3xl font-bold mb-6 text-center text-purple-300">⚔️ SkillVerse Login</h1>
+
+        <!-- Username -->
+        <div class="relative mb-4">
+            <input type="text" id="username" placeholder="Username"
+                class="w-full px-4 py-2 rounded-lg text-black placeholder-gray-600 focus:ring-2 focus:ring-purple-500">
+            <i class="fas fa-user absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+        </div>
+
+        <!-- Password -->
+        <div class="relative mb-6">
+            <input type="password" id="password" placeholder="Password"
+                class="w-full px-4 py-2 rounded-lg text-black placeholder-gray-600 focus:ring-2 focus:ring-purple-500">
+            <i id="togglePassword" class="fas fa-eye absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"></i>
+        </div>
+
+        <!-- Login Button -->
+        <button id="loginBtn" class="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-semibold mb-2 glow-btn flex items-center justify-center">
+            Login
+            <span id="loginSpinner" class="spinner"></span>
+        </button>
+
+        <!-- Signup Button -->
+        <button id="signupBtn" class="w-full bg-green-600 hover:bg-green-700 py-2 rounded-lg font-semibold mb-2 glow-btn">
+            Sign Up
+        </button>
+
+        <!-- Forgot Password Button -->
+        <button id="forgotBtn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-black py-2 rounded-lg font-semibold glow-btn">
+            Forgot Password
+        </button>
+
+        <!-- Message Display -->
+        <p id="message" class="mt-4 text-center text-sm text-red-300"></p>
+    </div>
+
+    <script>
+        // Password visibility toggle
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            togglePassword.classList.toggle('fa-eye', type === 'password');
+            togglePassword.classList.toggle('fa-eye-slash', type !== 'password');
+        });
+
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', async function () {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const message = document.getElementById('message');
+            const loginBtn = document.getElementById('loginBtn');
+            const spinner = document.getElementById('loginSpinner');
+
+            // Input validation
+            if (username === '' || password === '') {
+                message.textContent = 'Please enter both username and password.';
+                message.classList.add('error-shake');
+                setTimeout(() => message.classList.remove('error-shake'), 300);
+                return;
+            }
+
+            // Show spinner
+            loginBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+
+            try {
+                // Attempt backend login
+                const res = await fetch('http://localhost:5000/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: username, password }),
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    // Store username in localStorage for index.html
+                    localStorage.setItem('user', JSON.stringify({ name: username, avatar: 'avatar-1.jpg', xp: 1200, level: 5, inventory: ['Starter Badge'], completedQuests: [], achievements: [], progress: { html: 0, css: 0, js: 0, responsive: 0, git: 0, backend: 0 }, playTime: 0, lastLogin: Date.now() }));
+                    window.location.href = 'index.html';
+                } else {
+                    message.textContent = data.message;
+                    message.classList.add('error-shake');
+                    setTimeout(() => message.classList.remove('error-shake'), 300);
+                }
+            } catch (error) {
+                // Fallback for client-side demo (remove in production if backend is available)
+                if (username === 'demo' && password === 'password123') {
+                    localStorage.setItem('user', JSON.stringify({ name: username, avatar: 'avatar-1.jpg', xp: 1200, level: 5, inventory: ['Starter Badge'], completedQuests: [], achievements: [], progress: { html: 0, css: 0, js: 0, responsive: 0, git: 0, backend: 0 }, playTime: 0, lastLogin: Date.now() }));
+                    window.location.href = 'index.html';
+                } else {
+                    message.textContent = 'Invalid username or password. Try "demo" and "password123" for demo mode.';
+                    message.classList.add('error-shake');
+                    setTimeout(() => message.classList.remove('error-shake'), 300);
+                }
+            } finally {
+                loginBtn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        });
+
+        // Placeholder for signup and forgot password (to be implemented)
+        document.getElementById('signupBtn').addEventListener('click', () => {
+            document.getElementById('message').textContent = 'Sign Up functionality coming soon!';
+        });
+        document.getElementById('forgotBtn').addEventListener('click', () => {
+            document.getElementById('message').textContent = 'Forgot Password functionality coming soon!';
+        });
+    </script>
+</body>
+</html>

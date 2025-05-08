@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Leaderboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+    .dark-mode {
+    background-color: #121212;
+    color: #fff;
+}
+
+</style>
+
+<body>
+    <h1>🏆 Leaderboard</h1>
+    <ul id="leaderboard-list"></ul>
+
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+
+    <script>
+        async function loadLeaderboard() {
+            const res = await fetch('http://localhost:3000/leaderboard');
+            const users = await res.json();
+            const list = document.getElementById('leaderboard-list');
+            users.forEach((user, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${user.username} - ${user.score} pts (Level ${user.level})`;
+                list.appendChild(li);
+            });
+        }
+        loadLeaderboard();
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        window.onload = function () {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        };
+
+    </script>
+</body>
+
+</html>

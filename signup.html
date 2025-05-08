@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up - DevQuest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body
+    class="bg-gradient-to-br from-pink-700 via-purple-800 to-indigo-900 min-h-screen flex items-center justify-center text-white">
+    <div class="bg-gray-900 p-8 rounded-xl shadow-lg max-w-sm w-full">
+        <h1 class="text-3xl font-bold mb-6 text-center">✨ SkillVerse Sign Up</h1>
+
+        <!-- Username -->
+        <input type="text" id="username" placeholder="Username"
+            class="w-full mb-4 px-4 py-2 rounded-lg text-black placeholder-gray-600" />
+
+        <!-- Email -->
+        <input type="email" id="email" placeholder="Email"
+            class="w-full mb-4 px-4 py-2 rounded-lg text-black placeholder-gray-600" />
+
+        <!-- Password -->
+        <input type="password" id="password" placeholder="Password"
+            class="w-full mb-6 px-4 py-2 rounded-lg text-black placeholder-gray-600" />
+
+        <!-- Sign Up Button -->
+        <button id="signupBtn" class="w-full bg-green-600 hover:bg-green-700 py-2 rounded-lg font-semibold mb-2">
+            Sign Up
+        </button>
+
+        <!-- Back to Login -->
+        <button id="loginBtn" class="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-semibold mb-2">
+            Back to Login
+        </button>
+
+        <!-- Message Display -->
+        <p id="message" class="mt-4 text-center text-sm text-red-300"></p>
+    </div>
+
+    <script>
+        document.getElementById('signupBtn').addEventListener('click', async function () {
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const message = document.getElementById('message');
+
+            if (username === '' || email === '' || password === '') {
+                message.textContent = 'Please fill in all fields.';
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:5000/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password }),
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Sign-up successful! Please log in.');
+                    window.location.href = 'login.html';
+                } else {
+                    message.textContent = data.message;
+                }
+            } catch (error) {
+                message.textContent = 'Server error. Please try again later.';
+            }
+        });
+
+    </script>
+</body>
+
+</html>

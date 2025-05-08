@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>CSS Cove - DevQuest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+</head>
+
+<body class="bg-blue-100 text-gray-900 font-sans p-10">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-xl p-8">
+        <h1 class="text-3xl font-bold text-blue-700 mb-4">🎨 Welcome to CSS Cove</h1>
+        <p class="mb-4">Style your web pages like a pro!</p>
+
+        <h2 class="text-xl font-semibold mb-2">🎯 Challenges:</h2>
+        <ul class="list-disc pl-6 mb-6">
+            <li>Style your HTML page using inline, internal, and external CSS</li>
+            <li>Create a card layout with shadows and rounded corners</li>
+            <li>Use Flexbox to align items in a navigation bar</li>
+        </ul>
+        <button onclick="showPopup()"
+            class="mt-4 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg shadow-lg">
+            ✅ Mark as Complete
+        </button>
+
+
+        <a href="index.html" class="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">⬅️
+            Back to Map</a>
+    </div>
+
+    <div id="popup" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-xl text-center max-w-md mx-auto">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">🎉 Level Complete!</h2>
+            <p class="mb-4">You've conquered <strong>CSS Cove</strong>! 🌊</p>
+            <button onclick="nextLevel()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">➡️
+                Continue to JS Jungle</button>
+        </div>
+    </div>
+
+    <audio id="completionSound" src="https://www.myinstants.com/media/sounds/level-up.mp3"></audio>
+
+    <script>
+        if (localStorage.getItem("htmlCompleted") !== "true") {
+            alert("🔒 Complete HTML Island first!");
+            window.location.href = "html-island.html";
+        }
+        function showPopup() {
+            document.getElementById("popup").classList.remove("hidden");
+            localStorage.setItem("cssCompleted", "true");
+            document.getElementById("completionSound").play();
+        }
+
+        function nextLevel() {
+            window.location.href = "js-jungle.html";
+
+        }
+
+        function showPopup() {
+            document.getElementById("popup").classList.remove("hidden");
+            localStorage.setItem("cssCompleted", "true"); // ✅ correct key
+            document.getElementById("completionSound").play();
+
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+
+        function nextLevel() {
+            // 🔒 Only allow next if current is completed
+            window.location.href = "JS-JUNGLE.html";
+
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        window.onload = function () {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        };
+
+    </script>
+
+</body>
+
+</html>

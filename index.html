@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevQuest - Learn with Levels</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a2e0d5d5c2.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            cursor: url('sword-cursor.png'), auto;
+        }
+
+        .dark {
+            background: linear-gradient(to bottom right, #0a0a0a, #1a1a1a);
+            color: #e0e0e0;
+        }
+
+        .dark .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .dark .bg-purple-900 {
+            background: #2a1b3d;
+        }
+
+        .dark .bg-purple-700 {
+            background: #3c2f5f;
+        }
+
+        .dark .bg-yellow-400 {
+            background: #d4a017;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .achievement-popup,
+        .daily-challenge-popup,
+        .tutorial-popup {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .xp-gain {
+            animation: floatUp 1s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+
+        .new-badge {
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 10px yellow;
+            }
+
+            50% {
+                box-shadow: 0 0 20px yellow;
+            }
+        }
+
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .glow-btn:hover {
+            cursor: url('glow-cursor.png'), pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 text-white min-h-screen">
+    <div id="particles-js"></div>
+    <header class="bg-purple-900 p-4 flex justify-between items-center shadow-xl">
+        <div class="flex items-center space-x-4">
+            <button id="toggleSidebar" class="md:hidden text-white text-2xl">☰</button>
+            <h1 class="text-2xl font-bold">⚔️ SkillVerse</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <select id="languageSelect" class="bg-purple-700 text-white px-2 py-1 rounded">
+                <option value="en">English</option>
+                <option value="hi">Hindi</option>
+            </select>
+            <span id="xpDisplay" class="bg-yellow-400 text-purple-900 px-3 py-1 rounded-full">XP: 1200</span>
+            <button id="darkModeToggle" class="bg-gray-700 px-3 py-1 rounded flex items-center space-x-2 glow-btn">
+                <i class="fas fa-moon"></i>
+                <span>Dark Mode</span>
+            </button>
+        </div>
+    </header>
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <aside id="sidebar"
+            class="w-full md:w-1/4 bg-purple-900 p-6 flex flex-col justify-between rounded-r-3xl shadow-xl transition-transform duration-300 md:transform-none absolute md:static z-20">
+            <div>
+                <div class="text-center mb-6">
+                    <img id="playerAvatar" src="avatar-1.jpg" alt="avatar"
+                        class="w-24 mx-auto rounded-full border-4 border-yellow-400" aria-label="Player avatar" />
+                    <h2 id="playerNameDisplay" class="mt-3 text-2xl font-bold">Aayush</h2>
+                    <p id="levelDisplay" class="text-yellow-300 text-lg">Level 5</p>
+                    <p id="streakDisplay" class="text-yellow-300 text-sm">Streak: 0 days</p>
+                </div>
+                <!-- XP Bar -->
+                <div class="mb-6">
+                    <div class="bg-purple-700 rounded-full h-3 overflow-hidden">
+                        <div id="xpBar" class="bg-yellow-400 h-3 rounded-full w-[70%] transition-all duration-500">
+                        </div>
+                    </div>
+                </div>
+                <!-- Buttons -->
+                <div class="space-y-3">
+                    <button id="questsBtn"
+                        class="bg-purple-800 w-full py-2 rounded-lg hover:bg-purple-700 transition glow-btn"
+                        tabindex="0">Quests</button>
+                    <button id="inventoryBtn"
+                        class="bg-purple-800 w-full py-2 rounded-lg hover:bg-purple-700 transition glow-btn"
+                        tabindex="0">Inventory</button>
+                    <button id="leaderboardBtn"
+                        class="bg-purple-800 w-full py-2 rounded-lg hover:bg-purple-700 transition glow-btn"
+                        tabindex="0">Leaderboard</button>
+                    <button id="achievementsBtn"
+                        class="bg-purple-800 w-full py-2 rounded-lg hover:bg-purple-700 transition glow-btn"
+                        tabindex="0">Achievements</button>
+                    <button id="dailyChallengeBtn"
+                        class="bg-purple-800 w-full py-2 rounded-lg hover:bg-purple-700 transition glow-btn"
+                        tabindex="0">Daily Challenge</button>
+                    <button id="skillTreeBtn"
+                        class="bg-purple-800 w-full py-2 rounded-lg hover:bg-purple-700 transition glow-btn"
+                        tabindex="0">Skill Tree</button>
+                    <button id="miniGamesBtn"
+                        class="bg-purple-800 w-full py-2 rounded-lg hover:bg-purple-700 transition glow-btn"
+                        tabindex="0">Mini-Games</button>
+                    <button id="changeProfileBtn" class="bg-yellow-400 text-black w-full py-2 rounded-lg mt-4 glow-btn"
+                        tabindex="0">✏️ Change Profile</button>
+                </div>
+                <button id="resetAllProgressBtn"
+                    class="bg-red-700 hover:bg-red-800 text-white w-full py-2 rounded-lg mt-4 font-bold glow-btn"
+                    tabindex="0">
+                    ⚠️ Reset All Progress
+                </button>
+            </div>
+        </aside>
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 md:p-10 relative">
+            <div id="mainContent" class="glass-card rounded-xl p-6 relative h-full shadow-2xl">
+                <!-- Default Map View -->
+                <div id="mapView">
+                    <div
+                        class="absolute top-6 left-1/2 -translate-x-1/2 bg-yellow-300 text-purple-900 font-semibold px-6 py-2 rounded-xl shadow-md z-10">
+                        Next Challenge: Build a Responsive Page!
+                    </div>
+                    <div class="mb-4 text-center">
+                        <p id="overallProgress" class="text-lg font-semibold">Overall Progress: 0%</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20">
+                        <a href="html-island.html"
+                            class="glass-card p-6 rounded-2xl flex flex-col items-center justify-center shadow-xl"
+                            aria-label="HTML Island challenge">
+                            <i class="fas fa-scroll text-3xl mb-3"></i>
+                            <h3 class="text-xl font-bold">HTML Island</h3>
+                            <div class="w-full bg-purple-700 rounded-full h-2 mt-2">
+                                <div id="htmlProgress" class="bg-yellow-400 h-2 rounded-full"></div>
+                            </div>
+                            <p id="htmlProgressText" class="text-sm mt-1">0% Complete</p>
+                        </a>
+                        <a href="css-cove.html"
+                            class="glass-card p-6 rounded-2xl flex flex-col items-center justify-center shadow-xl"
+                            aria-label="CSS Cove challenge">
+                            <i class="fas fa-scroll text-3xl mb-3"></i>
+                            <h3 class="text-xl font-bold">CSS Cove</h3>
+                            <div class="w-full bg-purple-700 rounded-full h-2 mt-2">
+                                <div id="cssProgress" class="bg-yellow-400 h-2 rounded-full"></div>
+                            </div>
+                            <p id="cssProgressText" class="text-sm mt-1">0% Complete</p>
+                        </a>
+                        <a href="js-jungle.html"
+                            class="glass-card p-6 rounded-2xl flex flex-col items-center justify-center shadow-xl"
+                            aria-label="JS Jungle challenge">
+                            <i class="fas fa-scroll text-3xl mb-3"></i>
+                            <h3 class="text-xl font-bold">JS Jungle</h3>
+                            <div class="w-full bg-purple-700 rounded-full h-2 mt-2">
+                                <div id="jsProgress" class="bg-yellow-400 h-2 rounded-full"></div>
+                            </div>
+                            <p id="jsProgressText" class="text-sm mt-1">0% Complete</p>
+                        </a>
+                        <a href="responsive-reef.html"
+                            class="glass-card p-6 rounded-2xl flex flex-col items-center justify-center shadow-xl"
+                            aria-label="Responsive Reef challenge">
+                            <i class="fas fa-laptop-code text-3xl mb-3"></i>
+                            <h3 class="text-xl font-bold">Responsive Reef</h3>
+                            <div class="w-full bg-purple-700 rounded-full h-2 mt-2">
+                                <div id="responsiveProgress" class="bg-yellow-400 h-2 rounded-full"></div>
+                            </div>
+                            <p id="responsiveProgressText" class="text-sm mt-1">0% Complete</p>
+                        </a>
+                        <a href="git_glacier.html"
+                            class="glass-card p-6 rounded-2xl flex flex-col items-center justify-center shadow-xl"
+                            aria-label="Git Glacier challenge">
+                            <i class="fas fa-laptop-code text-3xl mb-3"></i>
+                            <h3 class="text-xl font-bold">Git Glacier</h3>
+                            <div class="w-full bg-purple-700 rounded-full h-2 mt-2">
+                                <div id="gitProgress" class="bg-yellow-400 h-2 rounded-full"></div>
+                            </div>
+                            <p id="gitProgressText" class="text-sm mt-1">0% Complete</p>
+                        </a>
+                        <a href="backend_bay.html"
+                            class="glass-card p-6 rounded-2xl flex flex-col items-center justify-center shadow-xl"
+                            aria-label="Backend Bay challenge">
+                            <i class="fas fa-laptop-code text-3xl mb-3"></i>
+                            <h3 class="text-xl font-bold">Backend Bay</h3>
+                            <div class="w-full bg-purple-700 rounded-full h-2 mt-2">
+                                <div id="backendProgress" class="bg-yellow-400 h-2 rounded-full"></div>
+                            </div>
+                            <p id="backendProgressText" class="text-sm mt-1">0% Complete</p>
+                        </a>
+                    </div>
+                </div>
+                <!-- Quests View -->
+                <div id="questsView" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">Available Quests</h2>
+                    <div id="questsList" class="space-y-4"></div>
+                </div>
+                <!-- Inventory View -->
+                <div id="inventoryView" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">Inventory</h2>
+                    <div id="inventoryList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                </div>
+                <!-- Leaderboard View -->
+                <div id="leaderboardView" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">Leaderboard</h2>
+                    <div id="leaderboardList" class="space-y-2"></div>
+                </div>
+                <!-- Achievements View -->
+                <div id="achievementsView" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">Achievements</h2>
+                    <div id="achievementsList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                </div>
+                <!-- Daily Challenge View -->
+                <div id="dailyChallengeView" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">Daily Challenge</h2>
+                    <div id="dailyChallengeContent" class="space-y-4"></div>
+                </div>
+                <!-- Skill Tree View -->
+                <div id="skillTreeView" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">Skill Tree</h2>
+                    <div id="skillTreeList" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                </div>
+                <!-- Mini-Games View -->
+                <div id="miniGamesView" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">Mini-Games</h2>
+                    <div class="glass-card p-6 rounded-lg">
+                        <h3 class="text-xl font-semibold mb-4">HTML Tag Match</h3>
+                        <canvas id="gameCanvas" class="w-full h-64 rounded-lg"></canvas>
+                        <p id="gameScore" class="text-center mt-4">Score: 0</p>
+                        <button id="startGame"
+                            class="bg-purple-600 hover:bg-purple-700 py-2 px-4 rounded-lg mt-4 glow-btn"
+                            tabindex="0">Start Game</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- User Profile Modal -->
+    <div id="profileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+        role="dialog" aria-labelledby="profileModalTitle">
+        <div class="glass-card p-6 rounded-xl text-center max-w-sm w-full">
+            <h2 id="profileModalTitle" class="text-xl font-bold mb-4 text-purple-300">Customize Your Profile</h2>
+            <input id="playerName" type="text" placeholder="Enter your name"
+                class="border p-2 w-full mb-4 rounded-lg text-black placeholder-gray-600" aria-label="Player name" />
+            <div class="flex justify-center mb-4 space-x-4 flex-wrap">
+                <img src="avatar-1.jpg" class="avatar-option w-12 h-12 rounded-full border-2 cursor-pointer"
+                    alt="Avatar 1" tabindex="0">
+                <img src="avatar-knight.jpg" class="avatar-option w-12 h-12 rounded-full border-2 cursor-pointer"
+                    alt="Knight Avatar" tabindex="0">
+                <img src="avatar-wizard.jpg" class="avatar-option w-12 h-12 rounded-full border-2 cursor-pointer"
+                    alt="Wizard Avatar" tabindex="0">
+            </div>
+            <div class="mb-4">
+                <label for="avatarColor" class="block text-sm mb-2">Avatar Border Color</label>
+                <input id="avatarColor" type="color" value="#facc15" class="w-16 h-8 rounded"
+                    aria-label="Avatar border color" />
+            </div>
+            <div class="text-left mb-4">
+                <p><strong>Quests Completed:</strong> <span id="questsCompleted">0</span></p>
+                <p><strong>Play Time:</strong> <span id="playTime">0h 0m</span></p>
+            </div>
+            <button id="saveProfile" class="bg-purple-700 text-white px-4 py-2 rounded-lg w-full mb-2 glow-btn"
+                tabindex="0">💾 Save Profile</button>
+            <button id="resetProfile" class="bg-red-500 text-white px-4 py-2 rounded-lg w-full glow-btn" tabindex="0">♻️
+                Reset Profile</button>
+        </div>
+    </div>
+    <!-- Reset Confirmation Modal -->
+    <div id="resetConfirmModal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50" role="dialog"
+        aria-labelledby="resetModalTitle">
+        <div class="glass-card p-6 rounded-xl text-center max-w-sm w-full">
+            <h2 id="resetModalTitle" class="text-xl font-bold mb-4 text-red-600">⚠️ Confirm Reset</h2>
+            <p class="mb-4 text-gray-300">Are you sure you want to reset your profile? This will remove your name and
+                avatar.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmReset" class="bg-red-500 text-white px-4 py-2 rounded-lg glow-btn" tabindex="0">Yes,
+                    Reset</button>
+                <button id="cancelReset" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg glow-btn"
+                    tabindex="0">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <!-- Achievement Notification -->
+    <div id="achievementNotification" class="fixed bottom-4 right-4 hidden">
+        <div class="glass-card p-4 rounded-lg achievement-popup">
+            <h3 id="achievementTitle" class="font-bold text-yellow-300"></h3>
+            <p id="achievementDesc" class="text-sm"></p>
+        </div>
+    </div>
+    <!-- Daily Challenge Notification -->
+    <div id="dailyChallengeNotification" class="fixed bottom-4 left-4 hidden">
+        <div class="glass-card p-4 rounded-lg daily-challenge-popup">
+            <h3 id="dailyChallengeTitle" class="font-bold text-yellow-300"></h3>
+            <p id="dailyChallengeDesc" class="text-sm"></p>
+        </div>
+    </div>
+    <!-- Tutorial Modal -->
+    <div id="tutorialModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+        role="dialog" aria-labelledby="tutorialModalTitle">
+        <div class="glass-card p-6 rounded-xl text-center max-w-md w-full">
+            <h2 id="tutorialModalTitle" class="text-xl font-bold mb-4 text-purple-300">Welcome to DevQuest!</h2>
+            <p id="tutorialText" class="mb-4"></p>
+            <button id="nextTutorial" class="bg-purple-700 text-white px-4 py-2 rounded-lg glow-btn"
+                tabindex="0">Next</button>
+            <button id="skipTutorial" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg mt-2 glow-btn"
+                tabindex="0">Skip</button>
+        </div>
+    </div>
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                quests: 'Quests',
+                inventory: 'Inventory',
+                leaderboard: 'Leaderboard',
+                achievements: 'Achievements',
+                dailyChallenge: 'Daily Challenge',
+                skillTree: 'Skill Tree',
+                miniGames: 'Mini-Games',
+                changeProfile: '✏️ Change Profile',
+                resetProgress: '⚠️ Reset All Progress',
+                saveProfile: '💾 Save Profile',
+                resetProfile: '♻️ Reset Profile',
+                confirmReset: 'Yes, Reset',
+                cancelReset: 'Cancel',
+                profileTitle: 'Customize Your Profile'
+            },
+            hi: {
+                quests: 'खोज',
+                inventory: 'सूची',
+                leaderboard: 'लीडरबोर्ड',
+                achievements: 'उपलब्धियाँ',
+                dailyChallenge: 'दैनिक चुनौती',
+                skillTree: 'कौशल वृक्ष',
+                miniGames: 'मिनी-गेम',
+                changeProfile: '✏️ प्रोफाइल बदलें',
+                resetProgress: '⚠️ सभी प्रगति रीसेट करें',
+                saveProfile: '💾 प्रोफाइल सहेजें',
+                resetProfile: '♻️ प्रोफाइल रीसेट करें',
+                confirmReset: 'हाँ, रीसेट करें',
+                cancelReset: 'रद्द करें',
+                profileTitle: 'अपनी प्रोफाइल अनुकूलित करें'
+            }
+        };
+
+        // Initialize user data
+        let user = JSON.parse(localStorage.getItem('user')) || {
+            name: 'Player',
+            avatar: 'avatar-1.jpg',
+            avatarColor: '#facc15',
+            xp: 1200,
+            level: 5,
+            inventory: [{ name: 'Starter Badge', earned: '2025-05-04' }],
+            completedQuests: [],
+            achievements: [],
+            progress: { html: 0, css: 0, js: 0, responsive: 0, git: 0, backend: 0 },
+            playTime: 0,
+            lastLogin: Date.now(),
+            streak: 0,
+            lastLoginDate: new Date().toDateString(),
+            skills: [],
+            language: 'en'
+        };
+        const quests = [
+            { id: 1, name: 'Complete HTML Island', xp: 100, reward: 'HTML Badge', status: 'available', category: 'html' },
+            { id: 2, name: 'Style CSS Cove', xp: 150, reward: 'CSS Badge', status: 'available', category: 'css' },
+            { id: 3, name: 'Script JS Jungle', xp: 200, reward: 'JS Badge', status: 'available', category: 'js' }
+        ];
+        const dailyChallenges = [
+            { id: 1, name: 'Code for 10 Minutes', desc: 'Spend 10 minutes coding today', xp: 50, reward: 'Daily Token' },
+            { id: 2, name: 'Complete a Quest', desc: 'Finish any quest', xp: 75, reward: 'Daily Token' },
+            { id: 3, name: 'Check Leaderboard', desc: 'View the leaderboard', xp: 25, reward: 'Daily Token' }
+        ];
+        const achievements = [
+            { id: 1, name: 'First Quest', desc: 'Complete your first quest', xp: 50, unlocked: false },
+            { id: 2, name: 'XP Master', desc: 'Earn 1000 XP', xp: 100, unlocked: false },
+            { id: 3, name: 'Collector', desc: 'Collect 3 badges', xp: 150, unlocked: false }
+        ];
+        const skills = [
+            { id: 1, name: 'Advanced CSS', desc: 'Unlock advanced styling techniques', xp: 500, unlocked: false },
+            { id: 2, name: 'Node.js Basics', desc: 'Learn server-side JavaScript', xp: 1000, unlocked: false },
+            { id: 3, name: 'API Integration', desc: 'Master API calls', xp: 1500, unlocked: false }
+        ];
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [
+            { name: 'Aayush', xp: 1200 },
+            { name: 'Emma', xp: 1000 },
+            { name: 'Liam', xp: 800 },
+            { name: 'Sophia', xp: 750 },
+            { name: 'Noah', xp: 700 },
+            { name: 'Olivia', xp: 650 },
+            { name: 'James', xp: 600 }
+        ];
+
+        // Sound Effects
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(frequency, type = 'sine', duration = 0.2) {
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
+            gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+            oscillator.stop(ctx.currentTime + duration);
+        }
+
+        // Update UI with translations
+        function updateUI() {
+            const lang = user.language;
+            document.getElementById('playerNameDisplay').textContent = user.name;
+            document.getElementById('playerAvatar').src = user.avatar;
+            document.getElementById('playerAvatar').style.borderColor = user.avatarColor;
+            document.getElementById('xpDisplay').textContent = `XP: ${user.xp}`;
+            document.getElementById('levelDisplay').textContent = `Level ${user.level}`;
+            document.getElementById('streakDisplay').textContent = `Streak: ${user.streak} days`;
+            const xpPercentage = Math.min((user.xp % 1000) / 10, 100);
+            document.getElementById('xpBar').style.width = `${xpPercentage}%`;
+            document.getElementById('questsCompleted').textContent = user.completedQuests.length;
+            const hours = Math.floor(user.playTime / 3600);
+            const minutes = Math.floor((user.playTime % 3600) / 60);
+            document.getElementById('playTime').textContent = `${hours}h ${minutes}m`;
+            updateProgress();
+            checkAchievements();
+            // Update button texts
+            document.getElementById('questsBtn').textContent = translations[lang].quests;
+            document.getElementById('inventoryBtn').textContent = translations[lang].inventory;
+            document.getElementById('leaderboardBtn').textContent = translations[lang].leaderboard;
+            document.getElementById('achievementsBtn').textContent = translations[lang].achievements;
+            document.getElementById('dailyChallengeBtn').textContent = translations[lang].dailyChallenge;
+            document.getElementById('skillTreeBtn').textContent = translations[lang].skillTree;
+            document.getElementById('miniGamesBtn').textContent = translations[lang].miniGames;
+            document.getElementById('changeProfileBtn').textContent = translations[lang].changeProfile;
+            document.getElementById('resetAllProgressBtn').textContent = translations[lang].resetProgress;
+            document.getElementById('saveProfile').textContent = translations[lang].saveProfile;
+            document.getElementById('resetProfile').textContent = translations[lang].resetProfile;
+            document.getElementById('confirmReset').textContent = translations[lang].confirmReset;
+            document.getElementById('cancelReset').textContent = translations[lang].cancelReset;
+            document.getElementById('profileModalTitle').textContent = translations[lang].profileTitle;
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+
+        // Language Toggle
+        document.getElementById('languageSelect').addEventListener('change', (e) => {
+            user.language = e.target.value;
+            updateUI();
+        });
+
+        // Progress Tracking
+        function updateProgress() {
+            const progress = user.progress;
+            const categories = ['html', 'css', 'js', 'responsive', 'git', 'backend'];
+            categories.forEach(category => {
+                const progressBar = document.getElementById(`${category}Progress`);
+                const progressText = document.getElementById(`${category}ProgressText`);
+                const percentage = progress[category];
+                progressBar.style.width = `${percentage}%`;
+                progressText.textContent = `${percentage}% Complete`;
+            });
+            const overall = Math.round(categories.reduce((sum, cat) => sum + progress[cat], 0) / categories.length);
+            document.getElementById('overallProgress').textContent = `Overall Progress: ${overall}%`;
+        }
+
+        // Achievement System
+        function checkAchievements() {
+            achievements.forEach(ach => {
+                if (!user.achievements.includes(ach.id)) {
+                    let unlocked = false;
+                    if (ach.id === 1 && user.completedQuests.length > 0) unlocked = true;
+                    if (ach.id === 2 && user.xp >= 1000) unlocked = true;
+                    if (ach.id === 3 && user.inventory.length >= 3) unlocked = true;
+                    if (unlocked) {
+                        user.achievements.push(ach.id);
+                        user.xp += ach.xp;
+                        showAchievement(ach);
+                        playSound(440);
+                    }
+                }
+            });
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+
+        function showAchievement(achievement) {
+            const notification = document.getElementById('achievementNotification');
+            document.getElementById('achievementTitle').textContent = achievement.name;
+            document.getElementById('achievementDesc').textContent = achievement.desc;
+            notification.classList.remove('hidden');
+            setTimeout(() => notification.classList.add('hidden'), 3000);
+        }
+
+        function renderAchievements() {
+            const achievementsList = document.getElementById('achievementsList');
+            achievementsList.innerHTML = '';
+            achievements.forEach(ach => {
+                const achElement = document.createElement('div');
+                achElement.className = `glass-card p-4 rounded-lg text-center ${user.achievements.includes(ach.id) ? '' : 'opacity-50'}`;
+                achElement.innerHTML = `
+                    <h3 class="font-bold">${ach.name}</h3>
+                    <p class="text-sm">${ach.desc}</p>
+                    <p class="text-sm text-yellow-300">${ach.xp} XP</p>
+                `;
+                achievementsList.appendChild(achElement);
+            });
+        }
+
+        // Daily Challenge System
+        function getDailyChallenge() {
+            const today = new Date().toDateString();
+            let daily = JSON.parse(localStorage.getItem('dailyChallenge'));
+            if (!daily || daily.date !== today) {
+                const index = Math.floor(Math.random() * dailyChallenges.length);
+                daily = { ...dailyChallenges[index], date: today, completed: false };
+                localStorage.setItem('dailyChallenge', JSON.stringify(daily));
+            }
+            return daily;
+        }
+
+        function renderDailyChallenge() {
+            const daily = getDailyChallenge();
+            const content = document.getElementById('dailyChallengeContent');
+            content.innerHTML = '';
+            const challengeElement = document.createElement('div');
+            challengeElement.className = 'glass-card p-4 rounded-lg flex justify-between items-center';
+            challengeElement.innerHTML = `
+                <div>
+                    <h3 class="font-bold">${daily.name}</h3>
+                    <p>XP: ${daily.xp} | Reward: ${daily.reward}</p>
+                    <p class="text-sm">${daily.desc}</p>
+                </div>
+                <button id="completeDaily" class="bg-yellow-400 text-purple-900 px-4 py-2 rounded-lg glow-btn ${daily.completed ? 'opacity-50 cursor-not-allowed' : ''}" tabindex="0">
+                    ${daily.completed ? 'Completed' : 'Complete'}
+                </button>
+            `;
+            content.appendChild(challengeElement);
+            if (!daily.completed) {
+                document.getElementById('completeDaily').addEventListener('click', () => {
+                    daily.completed = true;
+                    user.xp += daily.xp;
+                    user.inventory.push({ name: daily.reward, earned: new Date().toISOString().split('T')[0] });
+                    showXPGain(daily.xp);
+                    localStorage.setItem('dailyChallenge', JSON.stringify(daily));
+                    updateUI();
+                    renderDailyChallenge();
+                    playSound(880);
+                });
+            }
+        }
+
+        function showDailyChallengeNotification() {
+            const daily = getDailyChallenge();
+            if (!daily.completed) {
+                const notification = document.getElementById('dailyChallengeNotification');
+                document.getElementById('dailyChallengeTitle').textContent = `Daily: ${daily.name}`;
+                document.getElementById('dailyChallengeDesc').textContent = daily.desc;
+                notification.classList.remove('hidden');
+                setTimeout(() => notification.classList.add('hidden'), 5000);
+            }
+        }
+
+        // Streak System
+        function updateStreak() {
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            if (user.lastLoginDate !== today) {
+                if (user.lastLoginDate === yesterday) {
+                    user.streak += 1;
+                    if (user.streak === 3) {
+                        user.xp += 50;
+                        showAchievement({ name: '3-Day Streak', desc: 'Logged in 3 days in a row!', xp: 50 });
+                    }
+                } else {
+                    user.streak = 1;
+                }
+                user.lastLoginDate = today;
+            }
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+
+        // Tutorial System
+        const tutorialSteps = [
+            { text: 'Welcome to DevQuest! Click the Quests button to start learning.', highlight: 'questsBtn' },
+            { text: 'Check your progress in the Map View.', highlight: 'mapView' },
+            { text: 'Earn badges and track them in your Inventory.', highlight: 'inventoryBtn' },
+            { text: 'Compete with others on the Leaderboard!', highlight: 'leaderboardBtn' }
+        ];
+        let tutorialStep = 0;
+
+        function showTutorial() {
+            if (localStorage.getItem('hasSeenTutorial')) return;
+            const modal = document.getElementById('tutorialModal');
+            const text = document.getElementById('tutorialText');
+            const nextBtn = document.getElementById('nextTutorial');
+            const skipBtn = document.getElementById('skipTutorial');
+
+            function updateTutorial() {
+                if (tutorialStep >= tutorialSteps.length) {
+                    modal.classList.add('hidden');
+                    localStorage.setItem('hasSeenTutorial', 'true');
+                    return;
+                }
+                text.textContent = tutorialSteps[tutorialStep].text;
+                document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+                const highlightEl = document.getElementById(tutorialSteps[tutorialStep].highlight);
+                if (highlightEl) highlightEl.classList.add('highlight');
+            }
+
+            updateTutorial();
+            modal.classList.remove('hidden');
+
+            nextBtn.addEventListener('click', () => {
+                tutorialStep++;
+                updateTutorial();
+            });
+            skipBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                localStorage.setItem('hasSeenTutorial', 'true');
+            });
+        }
+
+        // Quests Functionality
+        function renderQuests() {
+            const questsList = document.getElementById('questsList');
+            questsList.innerHTML = '';
+            quests.forEach(quest => {
+                if (!user.completedQuests.includes(quest.id)) {
+                    const questItem = document.createElement('div');
+                    questItem.className = 'glass-card p-4 rounded-lg flex justify-between items-center';
+                    questItem.innerHTML = `
+                        <div>
+                            <h3 class="font-bold">${quest.name}</h3>
+                            <p>XP: ${quest.xp} | Reward: ${quest.reward}</p>
+                        </div>
+                        <button class="bg-yellow-400 text-purple-900 px-4 py-2 rounded-lg complete-quest glow-btn" data-id="${quest.id}" tabindex="0">Complete</button>
+                    `;
+                    questsList.appendChild(questItem);
+                }
+            });
+            document.querySelectorAll('.complete-quest').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const questId = parseInt(btn.dataset.id);
+                    const quest = quests.find(q => q.id === questId);
+                    user.xp += quest.xp;
+                    user.inventory.push({ name: quest.reward, earned: new Date().toISOString().split('T')[0] });
+                    user.completedQuests.push(quest.id);
+                    user.progress[quest.category] = Math.min(user.progress[quest.category] + 33, 100);
+                    showXPGain(quest.xp);
+                    updateUI();
+                    renderQuests();
+                    renderInventory();
+                    playSound(660);
+                });
+            });
+        }
+
+        // XP Gain Animation
+        function showXPGain(xp) {
+            const xpDisplay = document.getElementById('xpDisplay');
+            const gainElement = document.createElement('span');
+            gainElement.textContent = `+${xp} XP`;
+            gainElement.className = 'xp-gain absolute text-yellow-300 font-bold';
+            xpDisplay.appendChild(gainElement);
+            setTimeout(() => gainElement.remove(), 1000);
+        }
+
+        // Inventory Functionality
+        function renderInventory() {
+            const inventoryList = document.getElementById('inventoryList');
+            inventoryList.innerHTML = '';
+            user.inventory.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = `glass-card p-4 rounded-lg text-center ${index === user.inventory.length - 1 ? 'new-badge' : ''}`;
+                itemElement.innerHTML = `<p class="font-bold" title="Earned: ${item.earned}">${item.name}</p>`;
+                inventoryList.appendChild(itemElement);
+            });
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+
+        // Leaderboard Functionality
+        function renderLeaderboard() {
+            leaderboard = leaderboard.sort((a, b) => b.xp - a.xp);
+            leaderboard = leaderboard.map(player => ({
+                name: player.name,
+                xp: player.name === user.name ? user.xp : player.xp
+            }));
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '';
+            leaderboard.forEach((player, index) => {
+                const playerElement = document.createElement('div');
+                playerElement.className = 'glass-card p-4 rounded-lg flex justify-between';
+                playerElement.innerHTML = `
+                    <span>#${index + 1} ${player.name}</span>
+                    <span>${player.xp} XP</span>
+                `;
+                leaderboardList.appendChild(playerElement);
+            });
+        }
+
+        // Skill Tree Functionality
+        function renderSkillTree() {
+            const skillTreeList = document.getElementById('skillTreeList');
+            skillTreeList.innerHTML = '';
+            skills.forEach(skill => {
+                const unlocked = user.skills.includes(skill.id) || user.xp >= skill.xp;
+                const skillElement = document.createElement('div');
+                skillElement.className = `glass-card p-4 rounded-lg text-center ${unlocked ? '' : 'opacity-50'}`;
+                skillElement.innerHTML = `
+                    <h3 class="font-bold">${skill.name}</h3>
+                    <p class="text-sm">${skill.desc}</p>
+                    <p class="text-sm text-yellow-300">${skill.xp} XP Required</p>
+                    ${!unlocked ? '<button class="bg-purple-600 px-4 py-2 rounded-lg mt-2 glow-btn unlock-skill" data-id="' + skill.id + '" tabindex="0">Unlock</button>' : ''}
+                `;
+                skillTreeList.appendChild(skillElement);
+            });
+            document.querySelectorAll('.unlock-skill').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const skillId = parseInt(btn.dataset.id);
+                    if (user.xp >= skills.find(s => s.id === skillId).xp) {
+                        user.skills.push(skillId);
+                        updateUI();
+                        renderSkillTree();
+                        playSound(880);
+                    }
+                });
+            });
+        }
+
+        // Mini-Game Functionality
+        function initMiniGame() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            let score = 0;
+            const tags = ['<div>', '<p>', '<h1>'];
+            let currentTag = tags[Math.floor(Math.random() * tags.length)];
+            let position = { x: canvas.width / 2, y: 20 };
+            let speed = 2;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '20px Poppins';
+                ctx.textAlign = 'center';
+                ctx.fillText(currentTag, position.x, position.y);
+                position.y += speed;
+                if (position.y > canvas.height) {
+                    position.y = 20;
+                    currentTag = tags[Math.floor(Math.random() * tags.length)];
+                }
+                document.getElementById('gameScore').textContent = `Score: ${score}`;
+            }
+
+            document.getElementById('startGame').addEventListener('click', () => {
+                canvas.addEventListener('click', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const clickY = e.clientY - rect.top;
+                    if (Math.abs(clickX - position.x) < 50 && Math.abs(clickY - position.y) < 20) {
+                        score += 10;
+                        position.y = 20;
+                        currentTag = tags[Math.floor(Math.random() * tags.length)];
+                        if (score >= 50) {
+                            user.xp += 25;
+                            showXPGain(25);
+                            updateUI();
+                            score = 0;
+                        }
+                    }
+                });
+                setInterval(draw, 1000 / 60);
+            });
+        }
+
+        // View Switching
+        function showView(viewId) {
+            ['mapView', 'questsView', 'inventoryView', 'leaderboardView', 'achievementsView', 'dailyChallengeView', 'skillTreeView', 'miniGamesView'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        // Event Listeners
+        document.getElementById('questsBtn').addEventListener('click', () => {
+            showView('questsView');
+            renderQuests();
+        });
+        document.getElementById('inventoryBtn').addEventListener('click', () => {
+            showView('inventoryView');
+            renderInventory();
+        });
+        document.getElementById('leaderboardBtn').addEventListener('click', () => {
+            showView('leaderboardView');
+            renderLeaderboard();
+        });
+        document.getElementById('achievementsBtn').addEventListener('click', () => {
+            showView('achievementsView');
+            renderAchievements();
+        });
+        document.getElementById('dailyChallengeBtn').addEventListener('click', () => {
+            showView('dailyChallengeView');
+            renderDailyChallenge();
+        });
+        document.getElementById('skillTreeBtn').addEventListener('click', () => {
+            showView('skillTreeView');
+            renderSkillTree();
+        });
+        document.getElementById('miniGamesBtn').addEventListener('click', () => {
+            showView('miniGamesView');
+            initMiniGame();
+        });
+
+        // Profile Management
+        document.getElementById('changeProfileBtn').addEventListener('click', () => {
+            document.getElementById('playerName').value = user.name;
+            document.getElementById('avatarColor').value = user.avatarColor;
+            document.querySelectorAll('.avatar-option').forEach(img => {
+                img.classList.toggle('border-purple-700', img.src.includes(user.avatar));
+            });
+            document.getElementById('profileModal').classList.remove('hidden');
+        });
+        document.getElementById('saveProfile').addEventListener('click', () => {
+            user.name = document.getElementById('playerName').value.trim() || 'Player';
+            user.avatar = localStorage.getItem('selectedAvatar') || user.avatar;
+            user.avatarColor = document.getElementById('avatarColor').value;
+            updateUI();
+            document.getElementById('profileModal').classList.add('hidden');
+        });
+        document.querySelectorAll('.avatar-option').forEach(img => {
+            img.addEventListener('click', () => {
+                document.querySelectorAll('.avatar-option').forEach(i => i.classList.remove('border-purple-700'));
+                img.classList.add('border-purple-700');
+                localStorage.setItem('selectedAvatar', img.src);
+            });
+            img.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') img.click();
+            });
+        });
+        document.getElementById('resetProfile').addEventListener('click', () => {
+            document.getElementById('resetConfirmModal').classList.remove('hidden');
+        });
+        document.getElementById('confirmReset').addEventListener('click', () => {
+            user.name = 'Player';
+            user.avatar = 'avatar-1.jpg';
+            user.avatarColor = '#facc15';
+            localStorage.removeItem('selectedAvatar');
+            updateUI();
+            document.getElementById('profileModal').classList.add('hidden');
+            document.getElementById('resetConfirmModal').classList.add('hidden');
+        });
+        document.getElementById('cancelReset').addEventListener('click', () => {
+            document.getElementById('resetConfirmModal').classList.add('hidden');
+        });
+
+        // Reset All Progress
+        document.getElementById('resetAllProgressBtn').addEventListener('click', () => {
+            if (confirm('⚠️ Are you sure you want to reset ALL progress and profile?')) {
+                user = {
+                    name: 'Player',
+                    avatar: 'avatar-1.jpg',
+                    avatarColor: '#facc15',
+                    xp: 0,
+                    level: 1,
+                    inventory: [{ name: 'Starter Badge', earned: '2025-05-04' }],
+                    completedQuests: [],
+                    achievements: [],
+                    progress: { html: 0, css: 0, js: 0, responsive: 0, git: 0, backend: 0 },
+                    playTime: 0,
+                    lastLogin: Date.now(),
+                    streak: 0,
+                    lastLoginDate: new Date().toDateString(),
+                    skills: [],
+                    language: 'en'
+                };
+                localStorage.removeItem('selectedAvatar');
+                localStorage.setItem('user', JSON.stringify(user));
+                location.reload();
+            }
+        });
+
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            darkModeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+            darkModeToggle.querySelector('span').textContent = 'Light Mode';
+        }
+        darkModeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            darkModeToggle.querySelector('i').classList.toggle('fa-moon', !isDark);
+            darkModeToggle.querySelector('i').classList.toggle('fa-sun', isDark);
+            darkModeToggle.querySelector('span').textContent = isDark ? 'Light Mode' : 'Dark Mode';
+        });
+
+        // Responsive Sidebar
+        document.getElementById('toggleSidebar').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('sidebar-hidden');
+        });
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('profileModal').classList.add('hidden');
+                document.getElementById('resetConfirmModal').classList.add('hidden');
+                document.getElementById('tutorialModal').classList.add('hidden');
+            }
+        });
+
+        // Particles.js Background
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 50, density: { enable: true, value_area: 800 } },
+                color: { value: '#ffffff' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                move: { enable: true, speed: 1, direction: 'none', random: true }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' } },
+                modes: { repulse: { distance: 100 }, push: { particles_nb: 4 } }
+            }
+        });
+
+        // Play Time Tracker
+        setInterval(() => {
+            user.playTime += 1;
+            localStorage.setItem('user', JSON.stringify(user));
+            updateUI();
+        }, 1000);
+
+        // Initialize
+        window.onload = () => {
+            updateStreak();
+            updateUI();
+            renderQuests();
+            renderInventory();
+            renderLeaderboard();
+            renderAchievements();
+            showDailyChallengeNotification();
+            showTutorial();
+            if (!localStorage.getItem('user')) {
+                document.getElementById('profileModal').classList.remove('hidden');
+            }
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Git Galaxy</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<style>
+    .dark-mode {
+    background-color: #121212;
+    color: #fff;
+}
+
+</style>
+<body>
+    <h1>Welcome to Git Galaxy 🌌</h1>
+    <div id="level-container"></div>
+    <button onclick="nextLevel()">Next Level</button>
+
+    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+
+    <script>
+        const levels = [
+            { question: 'What command initializes a git repository?', answer: 'git init' },
+            { question: 'How do you check the status of your repo?', answer: 'git status' },
+            { question: 'Command to commit changes?', answer: 'git commit -m "message"' }
+        ];
+        let currentLevel = 0;
+
+        function showLevel() {
+            document.getElementById('level-container').innerHTML = `
+                <p>${levels[currentLevel].question}</p>
+                <input id="answer" placeholder="Your answer">
+                <button onclick="checkAnswer()">Submit</button>
+            `;
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('answer').value.trim();
+            if (userAnswer === levels[currentLevel].answer) {
+                alert('Correct!');
+                currentLevel++;
+                if (currentLevel < levels.length) {
+                    showLevel();
+                } else {
+                    alert('You completed Git Galaxy!');
+                }
+            } else {
+                alert('Try again!');
+            }
+        }
+
+        function nextLevel() {
+            if (currentLevel < levels.length) {
+                showLevel();
+            }
+        }
+
+        nextLevel();
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        window.onload = function () {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        };
+
+    </script>
+</body>
+
+</html>
